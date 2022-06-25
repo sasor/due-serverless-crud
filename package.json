@@ -1,0 +1,17 @@
+{
+  "name": "lambda-crud",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Lambda CRUD",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "sls deploy --stage dev --verbose",
+    "deployf": "sls deploy --stage dev --verbose function -f",
+    "clean": "sls remove"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1162.0",
+    "serverless": "^3.19.0",
+    "ulid": "^2.3.0"
+  }
+}

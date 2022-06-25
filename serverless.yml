@@ -1,0 +1,73 @@
+service: users
+frameworkVersion: '3'
+
+custom:
+  dynamoTableName: usersTable-${sls:stage}
+
+provider:
+  name: aws
+  stage: dev
+  runtime: nodejs14.x
+  region: us-east-1
+  profile: lambdaDev
+  environment:
+    DYNAMODB_USER_TABLE: ${self:custom.dynamoTableName}
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 'dynamodb:*'
+          Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:custom.dynamoTableName}
+
+functions:
+  healthy:
+    handler: handler.healthy
+    events:
+      - httpApi:
+          path: /
+          method: get
+  storeUser:
+    handler: src/users.store
+    events:
+      - httpApi:
+          path: /users
+          method: post
+  updateUser:
+    handler: src/users.update
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: put
+  indexUsers:
+    handler: src/users.index
+    events:
+      - httpApi:
+          path: /users
+          method: get
+  showUser:
+    handler: src/users.show
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: get
+  deleteUser:
+    handler: src/users.destroy
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: delete
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.dynamoTableName}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: _id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: _id
+            KeyType: HASH
